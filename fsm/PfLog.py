@@ -30,7 +30,7 @@ def sendCtrlCommand(  ):
             # Transition ID: ID_SENDCTRLCOMMAND_TRANSITION_CONNECTION
             # Actions:
             # ['<global>::serialCommandWrite' begin]
-            dre.ser.write(dre.command_tx_buf+chr(13))
+            dre.ser.write(dre.command_tx_buf+chr(13).encode()+chr(10).encode())
             # ['<global>::serialCommandWrite' end]
             state = ID_SENDCTRLCOMMAND_FINAL
 
