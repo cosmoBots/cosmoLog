@@ -1,0 +1,13 @@
+# You should edit this file and copy it to /etc/udev/rules.d/ in order to be sure 
+# your app will address the exact port, based on the manufacturer and model of your 
+# USB adaptor.
+# First you shall execute the comand 'lsusb' with your devices connected, and you will get something similar
+# to this list:
+# Bus 001 Device 008: ID 1a86:7523 QinHeng Electronics HL-340 USB-Serial adapter
+# Bus 001 Device 007: ID 067b:2303 Prolific Technology, Inc. PL2303 Serial Port
+# You can use the ID vendor:product part to set the values of the configuration lines as shown below:
+# This solution may work if you use different USB to serial products.  It may not work if you use the 
+# same products for both devices.
+SUBSYSTEM=="tty", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="7523", SYMLINK+="pfeiUSB"
+SUBSYSTEM=="tty", ATTRS{idVendor}=="067b", ATTRS{idProduct}=="2303", SYMLINK+="lakeUSB"
+
