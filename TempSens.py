@@ -11,6 +11,15 @@ from time import sleep
 print("Doreturn inicializado")
 doReturn = True
 
+def keep_alive():
+    global talive
+    print("reenvio ",PfLog.dre.command_tx_buf)
+    PfLog.sendCtrlCommand()
+    print("programo timer")
+    talive = threading.Timer(10.0,keep_alive)
+    talive.start()
+    
+
 def doit():
     #print("doit: ", threading.get_ident())
     global doReturn
@@ -20,6 +29,7 @@ def doit():
 def getDataLakeshore():
     global t
     global doReturn
+    global talive
     while not doReturn:
         sleep(0.05)
  
@@ -29,22 +39,42 @@ def getDataLakeshore():
     doReturn = False
     PfLog.dre.command_tx_buf="RDGST? A".encode()
     PfLog.sendCtrlCommand()
+    talive = threading.Timer(10.0,keep_alive)
+    talive.start()
+    print("programo timer")
     PfLog.getCtrlResponse()
+    print("cancelo timer")
+    talive.cancel()
     resp1 = PfLog.dre.command_rx_str
     status1 = int(resp1.strip())   # Removes whitespaces and assign to status of first channel
     PfLog.dre.command_tx_buf="KRDG? A".encode()
     PfLog.sendCtrlCommand()
+    talive = threading.Timer(10.0,keep_alive)
+    talive.start()
+    print("programo timer")
     PfLog.getCtrlResponse()
+    print("cancelo timer")
+    talive.cancel()
     resp1 = PfLog.dre.command_rx_str
     value1 = float(resp1.strip())  # Removes whitespaces and assign to value of first channel
     PfLog.dre.command_tx_buf="RDGST? B".encode()
     PfLog.sendCtrlCommand()
+    talive = threading.Timer(10.0,keep_alive)
+    talive.start()
+    print("programo timer")
     PfLog.getCtrlResponse()
+    print("cancelo timer")
+    talive.cancel()
     resp2 = PfLog.dre.command_rx_str
     status2 = int(resp2.strip())   # Removes whitespaces and assign to status of second channel
     PfLog.dre.command_tx_buf="KRDG? B".encode()
     PfLog.sendCtrlCommand()
+    talive = threading.Timer(10.0,keep_alive)
+    talive.start()
+    print("programo timer")
     PfLog.getCtrlResponse()
+    print("cancelo timer")
+    talive.cancel()
     resp2 = PfLog.dre.command_rx_str
     value2 = float(resp2.strip())  # Removes whitespaces and assign to value of second channel
     

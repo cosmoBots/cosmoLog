@@ -36,7 +36,6 @@ def datalogger(ser,getdata_cb,catsens1,catsens2,sensabbrev):
                 dre.ser.close()
 
     dre.ser = ser
-
     write_files = False
     write_server = True
 
@@ -76,6 +75,8 @@ def datalogger(ser,getdata_cb,catsens1,catsens2,sensabbrev):
 
     # Begin the endless loop which acquires from the device, processes, uploads and stores
     #while (i <= 100):
+    dre.ser.flushInput()
+    dre.ser.flushOutput()
     while (True):
         i += 1
         status1,value1,status2,value2 = getdata_cb()  # Gets the data from the device
@@ -102,7 +103,7 @@ def datalogger(ser,getdata_cb,catsens1,catsens2,sensabbrev):
 
         # Print the sample to the screen, to know everything is working
         if config.cte_verbose:
-            print(i1,": ",status1," ",value1," ",status2," ",value2)
+            print(sensabbrev," | ",i1,": ",status1," ",value1," ",status2," ",value2)
 
         # If the sample was the last of the series of the period 1, we have to create a record
         # to later upload to server or store in spreadsheet row
@@ -144,14 +145,14 @@ def datalogger(ser,getdata_cb,catsens1,catsens2,sensabbrev):
                 p1_row_data += ["Invalid","Invalid","Invalid","Invalid","Invalid"]
 
             if config.cte_verbose:
-                print("period1 tstamp: ",p1_row_data[0])
-                print("period1 min status1: ",p1_row_data[1])
-                print("period1 max status1: ",p1_row_data[2])
-                print("period1 min value1: ",p1_row_data[3])
-                print("period1 max value1: ",p1_row_data[4])
-                print("period1 mean value1: ",p1_row_data[5])            
-                print("period1 median value1: ",p1_row_data[6])            
-                print("period1 current value1: ",p1_row_data[7])
+                print(sensabbrev," period1 tstamp: ",p1_row_data[0])
+                print(sensabbrev," period1 min status1: ",p1_row_data[1])
+                print(sensabbrev," period1 max status1: ",p1_row_data[2])
+                print(sensabbrev," period1 min value1: ",p1_row_data[3])
+                print(sensabbrev," period1 max value1: ",p1_row_data[4])
+                print(sensabbrev," period1 mean value1: ",p1_row_data[5])            
+                print(sensabbrev," period1 median value1: ",p1_row_data[6])            
+                print(sensabbrev," period1 current value1: ",p1_row_data[7])
 
             ##### Second sensor handling
             # Let's add the min and max values of the status, to know if during the 
@@ -185,13 +186,13 @@ def datalogger(ser,getdata_cb,catsens1,catsens2,sensabbrev):
                 p1_row_data += ["Invalid","Invalid","Invalid","Invalid","Invalid"]
 
             if config.cte_verbose:
-                print("period1 min status2: ",p1_row_data[8])
-                print("period1 max status2: ",p1_row_data[9])
-                print("period1 min value2: ",p1_row_data[10])
-                print("period1 max value2: ",p1_row_data[11])
-                print("period1 mean value2: ",p1_row_data[12])
-                print("period1 median value2: ",p1_row_data[13])
-                print("period1 current value2: ",p1_row_data[14])
+                print(sensabbrev," period1 min status2: ",p1_row_data[8])
+                print(sensabbrev," period1 max status2: ",p1_row_data[9])
+                print(sensabbrev," period1 min value2: ",p1_row_data[10])
+                print(sensabbrev," period1 max value2: ",p1_row_data[11])
+                print(sensabbrev," period1 mean value2: ",p1_row_data[12])
+                print(sensabbrev," period1 median value2: ",p1_row_data[13])
+                print(sensabbrev," period1 current value2: ",p1_row_data[14])
 
             # Append the new record as a row in the spreadsheet
             p1_sheet_data += [p1_row_data]
@@ -257,14 +258,14 @@ def datalogger(ser,getdata_cb,catsens1,catsens2,sensabbrev):
                 p2_row_data += ["Invalid","Invalid","Invalid","Invalid","Invalid"]
 
             if config.cte_verbose:
-                print("period2 tstamp: ",p2_row_data[0])
-                print("period2 min status1: ",p2_row_data[1])
-                print("period2 max status1: ",p2_row_data[2])
-                print("period2 min value1: ",p2_row_data[3])
-                print("period2 max value1: ",p2_row_data[4])
-                print("period2 mean value1: ",p2_row_data[5])            
-                print("period2 median value1: ",p2_row_data[6])            
-                print("period2 current value1: ",p2_row_data[7])
+                print(sensabbrev," period2 tstamp: ",p2_row_data[0])
+                print(sensabbrev," period2 min status1: ",p2_row_data[1])
+                print(sensabbrev," period2 max status1: ",p2_row_data[2])
+                print(sensabbrev," period2 min value1: ",p2_row_data[3])
+                print(sensabbrev," period2 max value1: ",p2_row_data[4])
+                print(sensabbrev," period2 mean value1: ",p2_row_data[5])            
+                print(sensabbrev," period2 median value1: ",p2_row_data[6])            
+                print(sensabbrev," period2 current value1: ",p2_row_data[7])
 
             ##### Second sensor handling
             # Let's add the min and max values of the status, to know if during the 
@@ -282,13 +283,13 @@ def datalogger(ser,getdata_cb,catsens1,catsens2,sensabbrev):
                 p2_row_data += ["Invalid","Invalid","Invalid","Invalid","Invalid"]
 
             if config.cte_verbose:
-                print("period2 min status2: ",p2_row_data[8])
-                print("period2 max status2: ",p2_row_data[9])
-                print("period2 min value2: ",p2_row_data[10])
-                print("period2 max value2: ",p2_row_data[11])
-                print("period2 mean value2: ",p2_row_data[12])
-                print("period2 median value2: ",p2_row_data[13])
-                print("period2 current value2: ",p2_row_data[14])
+                print(sensabbrev," period2 min status2: ",p2_row_data[8])
+                print(sensabbrev," period2 max status2: ",p2_row_data[9])
+                print(sensabbrev," period2 min value2: ",p2_row_data[10])
+                print(sensabbrev," period2 max value2: ",p2_row_data[11])
+                print(sensabbrev," period2 mean value2: ",p2_row_data[12])
+                print(sensabbrev," period2 median value2: ",p2_row_data[13])
+                print(sensabbrev," period2 current value2: ",p2_row_data[14])
 
             # Append the new record as a row in the spreadsheet
             p2_sheet_data += [p2_row_data]

@@ -6,8 +6,18 @@
 
 from datalogger import *
 
+firstTime = True
+
 # Gets a response from the Motors
 def getDataPfeiffer():
+    global firstTime
+
+    if firstTime:
+        firstTime = False
+        PfLog.dre.command_tx_buf="COM,1".encode()
+        PfLog.sendCtrlCommand()
+        PfLog.getCtrlResponse()
+
     PfLog.getCtrlResponse()
     # PfLog.dre.command_rx_buf
     resp2 = PfLog.dre.command_rx_str
