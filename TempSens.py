@@ -13,9 +13,8 @@ doReturn = True
 
 def keep_alive():
     global talive
-    print("reenvio ",PfLog.dre.command_tx_buf)
+    print("TEMP RECOVERY: ",PfLog.dre.command_tx_buf)
     PfLog.sendCtrlCommand()
-    print("programo timer")
     talive = threading.Timer(10.0,keep_alive)
     talive.start()
     
@@ -41,9 +40,9 @@ def getDataLakeshore():
     PfLog.sendCtrlCommand()
     talive = threading.Timer(10.0,keep_alive)
     talive.start()
-    print("programo timer")
+    #print("programo timer")
     PfLog.getCtrlResponse()
-    print("cancelo timer")
+    #print("cancelo timer")
     talive.cancel()
     resp1 = PfLog.dre.command_rx_str
     status1 = int(resp1.strip())   # Removes whitespaces and assign to status of first channel
@@ -51,9 +50,9 @@ def getDataLakeshore():
     PfLog.sendCtrlCommand()
     talive = threading.Timer(10.0,keep_alive)
     talive.start()
-    print("programo timer")
+    #print("programo timer")
     PfLog.getCtrlResponse()
-    print("cancelo timer")
+    #print("cancelo timer")
     talive.cancel()
     resp1 = PfLog.dre.command_rx_str
     value1 = float(resp1.strip())  # Removes whitespaces and assign to value of first channel
@@ -61,9 +60,9 @@ def getDataLakeshore():
     PfLog.sendCtrlCommand()
     talive = threading.Timer(10.0,keep_alive)
     talive.start()
-    print("programo timer")
+    #print("programo timer")
     PfLog.getCtrlResponse()
-    print("cancelo timer")
+    #print("cancelo timer")
     talive.cancel()
     resp2 = PfLog.dre.command_rx_str
     status2 = int(resp2.strip())   # Removes whitespaces and assign to status of second channel
@@ -71,9 +70,9 @@ def getDataLakeshore():
     PfLog.sendCtrlCommand()
     talive = threading.Timer(10.0,keep_alive)
     talive.start()
-    print("programo timer")
+    #print("programo timer")
     PfLog.getCtrlResponse()
-    print("cancelo timer")
+    #print("cancelo timer")
     talive.cancel()
     resp2 = PfLog.dre.command_rx_str
     value2 = float(resp2.strip())  # Removes whitespaces and assign to value of second channel
