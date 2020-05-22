@@ -2,6 +2,7 @@
 # coding: utf-8
 
 from datalogger import *
+import threading
 
 def keep_alive():
     global talive
