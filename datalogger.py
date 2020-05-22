@@ -42,8 +42,8 @@ def datalogger(ser,getdata_cb,catsens1,catsens2,sensabbrev):
     # Configuration
     period1 = 30   # The number of samples per row for period 1, this period is also uploaded to server
     period2 = 600  # The number of samples per row for period 2, this period is NOT uploaded to server
-    period1_max_rows = 4 # The maximum number of rows per file of the period 1
-    period2_max_rows = 4 # The maximum number of rows per file of the period 2
+    period1_max_rows = 2880 # The maximum number of rows per file of the period 1
+    period2_max_rows = 144 # The maximum number of rows per file of the period 2
     valid_status_limit = 255  # maximum status code to store values in rows.  
                 # If the status is greater than this maximum, the sample will not be added to the series
                 # if the full set is invalid, it will not be uploaded to server, and it will be stored
