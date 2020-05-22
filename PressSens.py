@@ -1,24 +1,24 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[ ]:
-
-
 from datalogger import *
 
-firstTime = True
+def keep_alive():
+    global talive
+    PfLog.dre.command_tx_buf="COM,1".encode()    
+    print("reenvio ",PfLog.dre.command_tx_buf)
+    PfLog.sendCtrlCommand()
+    print("programo timer")
+    talive = threading.Timer(10.0,keep_alive)
+    talive.start()
 
 # Gets a response from the Motors
 def getDataPfeiffer():
-    global firstTime
-
-    if firstTime:
-        firstTime = False
-        PfLog.dre.command_tx_buf="COM,1".encode()
-        PfLog.sendCtrlCommand()
-        PfLog.getCtrlResponse()
-
+    print("programo timer")
+    talive = threading.Timer(10.0,keep_alive)
+    talive.start()
     PfLog.getCtrlResponse()
+    talive.cancel()
     # PfLog.dre.command_rx_buf
     resp2 = PfLog.dre.command_rx_str
     splitresp = resp2.split(',')  # Splits the string into groups

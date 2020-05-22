@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-from datalogger import PfLog
+sys.path.insert(0, './fsm')
+import PfLog
+
 import serial
 import config
 
