@@ -27,6 +27,12 @@ project_data = sorted(tmp, key=lambda k: k.id)
 
 
 for datum in project_data:
+    tstamp = datum.custom_fields.get(rm_cfield_tstamp).value
+    if ':' not in tstamp:
+        newtstamp = tstamp[:10] +' '+ tstamp[11:13] + ':' + tstamp[13:15] + ':' + tstamp[15:17]
+    else:
+        newtstamp = tstamp
+
     if (datum.category.name == "Pres2"):
         if (datum.status.id==rm_status_new_id):
             print("Status:",datum.status.name)
@@ -47,7 +53,8 @@ for datum in project_data:
                                 {'id': rm_cfield_min,'value': minvalue},
                                 {'id': rm_cfield_max,'value': maxvalue},
                                 {'id': rm_cfield_mean,'value': meanvalue},
-                                {'id': rm_cfield_median,'value': medianvalue}
+                                {'id': rm_cfield_median,'value': medianvalue},
+                                {'id': rm_cfield_tstamp,'value': newtstamp}
                                 ]
             )
 
