@@ -11,11 +11,11 @@ rm_cfield_mean = 6 # Custom field id of the mean value
 rm_cfield_median = 7	# Custom field id of the median value
 rm_cfield_samples = 8	# Custom field id of the number of samples in the series
 rm_cfield_tstamp = 9	# Custom field id of the timestamp
-
+rm_status_new_id = 1
+rm_status_converted_id = 6
 # Project specific settings
 rm_project_id_str = 'pfeiffer-test'		# The ID of the Redmine project where the samples shall be stored
-rm_cat_press1 = 1       # Category for pressure sensor #1
-rm_cat_press2 = 2       # Category for pressure sensor #2
-rm_cat_temp1 = 3        # Category for temperature sensor #1
-rm_cat_temp2 = 4        # Category for temperature sensor #2
-
+rm_cat_press1 = 1	# Category for press sensor #1
+rm_cat_press2 = 2	# Category for prsss sensor #2
+rm_cat_temp1 = 3	# Category for temp sensor #1
+rm_cat_temp2 = 4	# Category for temp sensor #2
