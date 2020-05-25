@@ -17,7 +17,7 @@ for p in projects:
 my_project = redmine.project.get(rm_project_id_str)
 print ("Obtenemos proyecto: ",my_project.identifier," | ",my_project.name)
 
-tmp = redmine.issue.filter(project_id=rm_project_id_str, tracker_id=rm_tracker_id, status_id='*')
+tmp = redmine.issue.filter(project_id=rm_project_id_str, tracker_id=rm_tracker_id, status_id=rm_status_new_id)
 project_data = sorted(tmp, key=lambda k: k.id)
 
 
@@ -34,7 +34,6 @@ for datum in project_data:
         newtstamp = tstamp
 
     if (datum.category.name == "Pres2"):
-        if (datum.status.id==rm_status_new_id):
             print("Status:",datum.status.name)
             value = float(datum.custom_fields.get(rm_cfield_value).value) * 1e9
             # veo el valor 
@@ -57,24 +56,12 @@ for datum in project_data:
                                 {'id': rm_cfield_tstamp,'value': newtstamp}
                                 ]
             )
+    else:
+            redmine.issue.update(resource_id=datum.id,
+                 status_id = rm_status_converted_id,
+                 custom_fields=[{'id': rm_cfield_tstamp,'value': newtstamp}]
+            )
 
-
-# 
-# 
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
 
 
 
