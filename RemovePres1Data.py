@@ -17,7 +17,7 @@ for p in projects:
 my_project = redmine.project.get(rm_project_id_str)
 print ("Obtenemos proyecto: ",my_project.identifier," | ",my_project.name)
 
-tmp = redmine.issue.filter(project_id=rm_project_id_str, tracker_id=rm_tracker_id, status_id='*')
+tmp = redmine.issue.filter(project_id=rm_project_id_str, tracker_id=rm_tracker_id, status_id=rm_status_new_id)
 project_data = sorted(tmp, key=lambda k: k.id)
 
 
