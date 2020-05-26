@@ -32,7 +32,9 @@ for datum in project_data:
         newtstamp = tstamp[:10] +' '+ tstamp[11:13] + ':' + tstamp[13:15] + ':' + tstamp[15:17]
     else:
         newtstamp = tstamp
+        print("New tstamp")
 
+    
     if (datum.category.name == "Pres2"):
             print("Status:",datum.status.name)
             value = float(datum.custom_fields.get(rm_cfield_value).value) * 1e9
@@ -57,10 +59,35 @@ for datum in project_data:
                                 ]
             )
     else:
-            redmine.issue.update(resource_id=datum.id,
-                 status_id = rm_status_converted_id,
-                 custom_fields=[{'id': rm_cfield_tstamp,'value': newtstamp}]
-            )
+        # Cambiamos a 0 los valores que no estén bien
+        if (datum.category.name == "Temp1") or (datum.category.name == "Temp2"):
+            print("Tratamos temperaturas")
+            minstatus = int(datum.custom_fields.get(rm_cfield_minstatus).value)
+            print("minstatus",minstatus)
+            if (minstatus == 96):
+                print("tstamp:",newtstamp)
+                print("value:",float(datum.custom_fields.get(rm_cfield_value).value))
+                value = 0.0
+                # veo el valor 
+                minvalue = 0.0
+                maxvalue = 0.0
+                meanvalue = 0.0
+                medianvalue = 0.0
+                redmine.issue.update(resource_id=datum.id,
+                     status_id = rm_status_converted_id,
+                     custom_fields=[{'id': rm_cfield_value,'value': value},
+                                    {'id': rm_cfield_min,'value': minvalue},
+                                    {'id': rm_cfield_max,'value': maxvalue},
+                                    {'id': rm_cfield_mean,'value': meanvalue},
+                                    {'id': rm_cfield_median,'value': medianvalue},
+                                    {'id': rm_cfield_tstamp,'value': newtstamp}
+                                    ]
+                )
+            else:
+                redmine.issue.update(resource_id=datum.id,
+                     status_id = rm_status_converted_id,
+                     custom_fields=[{'id': rm_cfield_tstamp,'value': newtstamp}]
+                )
 
 
 
