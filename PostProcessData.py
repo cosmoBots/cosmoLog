@@ -35,7 +35,7 @@ for datum in project_data:
         print("New tstamp")
 
     
-    if (datum.category.name == "Pres2"):
+    if (datum.category.id == rm_cat_press2):
             print("Status:",datum.status.name)
             value = float(datum.custom_fields.get(rm_cfield_value).value) * 1e9
             # veo el valor 
@@ -60,7 +60,7 @@ for datum in project_data:
             )
     else:
         # Cambiamos a 0 los valores que no estén bien
-        if (datum.category.name == "Temp1") or (datum.category.name == "Temp2"):
+        if (datum.category.id == rm_cat_temp1) or (datum.category.id == rm_cat_temp2):
             print("Tratamos temperaturas")
             minstatus = int(datum.custom_fields.get(rm_cfield_minstatus).value)
             print("minstatus",minstatus)

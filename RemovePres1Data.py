@@ -23,32 +23,7 @@ project_data = sorted(tmp, key=lambda k: k.id)
 
 # Borramos los datos de "Press1" ya que no se usan
 
-# In[ ]:
-
-
 for datum in project_data:
-    if (datum.category.name == "Pres1"):
+    if (datum.category.id == rm_cat_press1):
         print(datum)
         datum.delete()
-
-
-# 
-# 
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
