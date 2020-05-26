@@ -84,10 +84,18 @@ for datum in project_data:
                                     ]
                 )
             else:
-                redmine.issue.update(resource_id=datum.id,
-                     status_id = rm_status_converted_id,
-                     custom_fields=[{'id': rm_cfield_tstamp,'value': newtstamp}]
-                )
+                if (datum.category.id == rm_cat_temp1):
+                    medianvalue = float(datum.custom_fields.get(rm_cfield_median).value)
+                    redmine.issue.update(resource_id=datum.id,
+                         status_id = rm_status_converted_id,
+                         custom_fields=[{'id': rm_cfield_value,'value': medianvalue},
+                                         {'id': rm_cfield_tstamp,'value': newtstamp}]
+                    )
+                else:
+                    redmine.issue.update(resource_id=datum.id,
+                         status_id = rm_status_converted_id,
+                         custom_fields=[{'id': rm_cfield_tstamp,'value': newtstamp}]
+                    )
 
 
 

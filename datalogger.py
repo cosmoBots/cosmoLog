@@ -121,7 +121,7 @@ def datalogger(ser,getdata_cb,catsens1,catsens2,sensabbrev):
             # If we obtained at least one valid data, we will make statistics and append the resulting
             # data to the record
             if (len(period1_data1) > 0):
-                p1_row_data += [min(period1_data1),max(period1_data1),statistics.mean(period1_data1),statistics.median(period1_data1),period1_data2[-1]]
+                p1_row_data += [min(period1_data1),max(period1_data1),statistics.mean(period1_data1),statistics.median(period1_data1),period1_data1[-1]]
                 # The record must be uploaded to the server only if there is at least one valid sample in the series
                 if (write_server):
                     thisreqpres1 = redmine.issue.create(project_id = my_project.id,
