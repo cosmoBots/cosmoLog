@@ -7,6 +7,7 @@
 from datalogger import *
 import threading
 from time import sleep
+from config import *
 
 print("Doreturn inicializado")
 doReturn = True
@@ -24,60 +25,64 @@ def doit():
     global doReturn
     doReturn = True
 
-# Gets a response from the Motors
 def getDataLakeshore():
-    global t
-    global doReturn
-    global talive
-    while not doReturn:
-        sleep(0.05)
- 
-    #print("getDataLakeshore: ", threading.get_ident())
-    t = threading.Timer(1.0, doit)
-    t.start()
-    doReturn = False
-    PfLog.dre.command_tx_buf="RDGST? A".encode()
-    PfLog.sendCtrlCommand()
-    talive = threading.Timer(10.0,keep_alive)
-    talive.start()
-    #print("programo timer")
-    PfLog.getCtrlResponse()
-    #print("cancelo timer")
-    talive.cancel()
-    resp1 = PfLog.dre.command_rx_str
-    status1 = int(resp1.strip())   # Removes whitespaces and assign to status of first channel
-    PfLog.dre.command_tx_buf="KRDG? A".encode()
-    PfLog.sendCtrlCommand()
-    talive = threading.Timer(10.0,keep_alive)
-    talive.start()
-    #print("programo timer")
-    PfLog.getCtrlResponse()
-    #print("cancelo timer")
-    talive.cancel()
-    resp1 = PfLog.dre.command_rx_str
-    value1 = float(resp1.strip())  # Removes whitespaces and assign to value of first channel
-    PfLog.dre.command_tx_buf="RDGST? B".encode()
-    PfLog.sendCtrlCommand()
-    talive = threading.Timer(10.0,keep_alive)
-    talive.start()
-    #print("programo timer")
-    PfLog.getCtrlResponse()
-    #print("cancelo timer")
-    talive.cancel()
-    resp2 = PfLog.dre.command_rx_str
-    status2 = int(resp2.strip())   # Removes whitespaces and assign to status of second channel
-    PfLog.dre.command_tx_buf="KRDG? B".encode()
-    PfLog.sendCtrlCommand()
-    talive = threading.Timer(10.0,keep_alive)
-    talive.start()
-    #print("programo timer")
-    PfLog.getCtrlResponse()
-    #print("cancelo timer")
-    talive.cancel()
-    resp2 = PfLog.dre.command_rx_str
-    value2 = float(resp2.strip())  # Removes whitespaces and assign to value of second channel
-    
-    return status1, value1, status2, value2
+    if (cte_simulate_sensors):
+        #print("Espero 0.3 segundos")
+        sleep(.5)
+        return 99, 5555.0, 98, 5554
+    else:
+        global t
+        global doReturn
+        global talive
+        while not doReturn:
+            sleep(0.05)
+
+        #print("getDataLakeshore: ", threading.get_ident())
+        t = threading.Timer(1.0, doit)
+        t.start()
+        doReturn = False
+        PfLog.dre.command_tx_buf="RDGST? A".encode()
+        PfLog.sendCtrlCommand()
+        talive = threading.Timer(10.0,keep_alive)
+        talive.start()
+        #print("programo timer")
+        PfLog.getCtrlResponse()
+        #print("cancelo timer")
+        talive.cancel()
+        resp1 = PfLog.dre.command_rx_str
+        status1 = int(resp1.strip())   # Removes whitespaces and assign to status of first channel
+        PfLog.dre.command_tx_buf="KRDG? A".encode()
+        PfLog.sendCtrlCommand()
+        talive = threading.Timer(10.0,keep_alive)
+        talive.start()
+        #print("programo timer")
+        PfLog.getCtrlResponse()
+        #print("cancelo timer")
+        talive.cancel()
+        resp1 = PfLog.dre.command_rx_str
+        value1 = float(resp1.strip())  # Removes whitespaces and assign to value of first channel
+        PfLog.dre.command_tx_buf="RDGST? B".encode()
+        PfLog.sendCtrlCommand()
+        talive = threading.Timer(10.0,keep_alive)
+        talive.start()
+        #print("programo timer")
+        PfLog.getCtrlResponse()
+        #print("cancelo timer")
+        talive.cancel()
+        resp2 = PfLog.dre.command_rx_str
+        status2 = int(resp2.strip())   # Removes whitespaces and assign to status of second channel
+        PfLog.dre.command_tx_buf="KRDG? B".encode()
+        PfLog.sendCtrlCommand()
+        talive = threading.Timer(10.0,keep_alive)
+        talive.start()
+        #print("programo timer")
+        PfLog.getCtrlResponse()
+        #print("cancelo timer")
+        talive.cancel()
+        resp2 = PfLog.dre.command_rx_str
+        value2 = float(resp2.strip())  # Removes whitespaces and assign to value of second channel
+
+        return status1, value1, status2, value2
 
 
 # In[ ]:
@@ -95,29 +100,21 @@ serport = serial.Serial(
     )
 if config.cte_verbose:
     print("Chosen serial port: " + config.cte_serial_port2)
-datalogger(serport,getDataLakeshore,rm_cat_temp1,rm_cat_temp2,"temp")
 
 
-# In[ ]:
+def execTempDatalog():
+    datalogger(serport,getDataLakeshore,rm_cat_temp1,rm_cat_temp2,"temp")
 
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
+tempDatalog = threading.Thread(target=execTempDatalog, name="tempDatalog")
+print("*** Lanzo tempDatalog")
+tempDatalog.start()
+veces = 1
+while(1):
+    sleep(10)
+    threadvivo = tempDatalog.is_alive()
+    if not threadvivo:
+        tempDatalog = threading.Thread(target=execTempDatalog, name="tempDatalog")
+        print("*** Relanzo tempDatalog",veces)
+        tempDatalog.start()
 
 

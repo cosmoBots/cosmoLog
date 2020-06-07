@@ -7,26 +7,81 @@ from pyexcel_ods import save_data
 import statistics
 from config_rm import *
 from redminelib import Redmine
-
-redmine = Redmine(rm_server_url,key=rm_key_txt)
-projects = redmine.project.all()
-
-print("Proyectos:")
-for p in projects:
-    print ("\t",p.identifier," \t| ",p.name)
-
-my_project = redmine.project.get(rm_project_id_str)
-print ("Obtenemos proyecto: ",my_project.identifier," | ",my_project.name)    
-    
-tmp = redmine.issue.filter(project_id=rm_project_id_str, tracker_id=rm_tracker_id, status_id='*')
-my_project_issues = sorted(tmp, key=lambda k: k.id)
+import threading
+from collections import deque
 
 sys.path.insert(0, './fsm')
 import PfLog
 
+datos_acumulados = deque([])
+tupload = None
+
+def uploader():
+    global datos_acumulados
+    global tupload
+    
+    tupload = threading.Timer(40.0,uploader)
+    tupload.start()
+    print("************* Datos en cola*******",len(datos_acumulados))
+
+    redmine = Redmine(rm_server_url,key=rm_key_txt)
+    if redmine is None:
+        print("Error getting redmine instance")
+    
+    else:
+        print("Redmine instance get")
+        projects = redmine.project.all()
+        if projects is None:
+            print("Error getting redmine projects list")
+        
+        else:
+            print("Proyectos:")
+            for p in projects:
+                print ("\t",p.identifier," \t| ",p.name)
+
+            my_project = redmine.project.get(rm_project_id_str)
+            if my_project is None:
+                print("Error getting redmine project instance")
+            else:
+                print ("Obtenemos proyecto: ",my_project.identifier," | ",my_project.name)    
+    
+                while (len(datos_acumulados)>0):
+                    print("************* Datos en cola*******",len(datos_acumulados))
+                    datoasubir = datos_acumulados[0]
+                    if datoasubir is not None:
+                        print(f'Working on {datoasubir}')
+                        thisreqpres2 = redmine.issue.create(project_id = my_project.id,
+                                                   tracker_id = datoasubir['tracker_id'],
+                                                   subject = datoasubir['subject'],
+                                                   category_id = datoasubir['category_id'],
+                                                   custom_fields=[
+                                                       {'id': rm_cfield_value,'value': datoasubir['value']},
+                                                       {'id': rm_cfield_minstatus,'value': datoasubir['minstatus']},
+                                                       {'id': rm_cfield_maxstatus,'value': datoasubir['maxstatus']},
+                                                       {'id': rm_cfield_min,'value': datoasubir['min']},
+                                                       {'id': rm_cfield_max,'value':  datoasubir['max']},
+                                                       {'id': rm_cfield_mean,'value':  datoasubir['mean']},
+                                                       {'id': rm_cfield_median,'value':  datoasubir['median']},
+                                                       {'id': rm_cfield_samples,'value': datoasubir['samples']},
+                                                       {'id': rm_cfield_tstamp,'value': datoasubir['tstamp']}                                                             ]
+                          )
+                        datos_acumulados.popleft()
+                        print(f'Finished {datoasubir}')
 
 
+
+
+uploaderThread = None
+                
 def datalogger(ser,getdata_cb,catsens1,catsens2,sensabbrev):
+    global uploaderThread
+    global datos_acumulados
+    global tupload
+    
+    tupload = threading.Timer(40.0,uploader)
+    tupload.start()
+    
+    # turn-on the worker thread
     dre = PfLog.dre
 
     # This is to allow consecutive partial executions of the notebook
@@ -77,6 +132,7 @@ def datalogger(ser,getdata_cb,catsens1,catsens2,sensabbrev):
     #while (i <= 100):
     dre.ser.flushInput()
     dre.ser.flushOutput()
+
     while (True):
         i += 1
         status1,value1,status2,value2 = getdata_cb()  # Gets the data from the device
@@ -110,7 +166,7 @@ def datalogger(ser,getdata_cb,catsens1,catsens2,sensabbrev):
         if (i1 >= period1):
             # The current sample is the last one
             # let's create a timestamp and add it to the record
-            tstamp = datetime.now().strftime("%Y-%m-%d-%H%M%S")
+            tstamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             p1_row_data = [tstamp]
 
             ##### First sensor handling
@@ -124,21 +180,23 @@ def datalogger(ser,getdata_cb,catsens1,catsens2,sensabbrev):
                 p1_row_data += [min(period1_data1),max(period1_data1),statistics.mean(period1_data1),statistics.median(period1_data1),period1_data1[-1]]
                 # The record must be uploaded to the server only if there is at least one valid sample in the series
                 if (write_server):
-                    thisreqpres1 = redmine.issue.create(project_id = my_project.id,
-                                                       tracker_id = rm_tracker_id,
-                                                       subject = 'p1',
-                                                       category_id = catsens1,
-                                                       custom_fields=[
-                                                           {'id': rm_cfield_value,'value': p1_row_data[7]},
-                                                           {'id': rm_cfield_minstatus,'value': p1_row_data[1]},
-                                                           {'id': rm_cfield_maxstatus,'value': p1_row_data[2]},
-                                                           {'id': rm_cfield_min,'value':  p1_row_data[3]},
-                                                           {'id': rm_cfield_max,'value':  p1_row_data[4]},
-                                                           {'id': rm_cfield_mean,'value':  p1_row_data[5]},
-                                                           {'id': rm_cfield_median,'value':  p1_row_data[5]},
-                                                           {'id': rm_cfield_samples,'value': len(period1_data1)},
-                                                           {'id': rm_cfield_tstamp,'value': p1_row_data[0]}                                                             ]
-                                                      )
+                    datoasubir = { 
+                                  'tracker_id': rm_tracker_id,
+                                  'subject': 'p1',
+                                  'category_id': catsens1,
+                                  'value': p1_row_data[7],
+                                  'minstatus': p1_row_data[1],
+                                  'maxstatus': p1_row_data[2],
+                                  'min': p1_row_data[3],
+                                  'max': p1_row_data[4],
+                                  'mean': p1_row_data[5],
+                                  'median': p1_row_data[6],
+                                  'samples': len(period1_data1),
+                                  'tstamp': p1_row_data[0]
+                                 }
+                    datos_acumulados.append(datoasubir)
+                    print("Long datosacumulados",len(datos_acumulados))
+
             # When there is no valid data, we will add a row in the spreadsheet telling 
             # it is invalid, but we will not upload info to the server
             else:
@@ -165,21 +223,23 @@ def datalogger(ser,getdata_cb,catsens1,catsens2,sensabbrev):
                 p1_row_data += [min(period1_data2),max(period1_data2),statistics.mean(period1_data2),statistics.median(period1_data2),period1_data2[-1]]
                 # The record must be uploaded to the server only if there is at least one valid sample in the series
                 if (write_server):
-                    thisreqpres2 = redmine.issue.create(project_id = my_project.id,
-                                                       tracker_id = rm_tracker_id,
-                                                       subject = 'p2',
-                                                       category_id = catsens2,
-                                                       custom_fields=[
-                                                           {'id': rm_cfield_value,'value': p1_row_data[14]},
-                                                           {'id': rm_cfield_minstatus,'value': p1_row_data[8]},
-                                                           {'id': rm_cfield_maxstatus,'value': p1_row_data[9]},
-                                                           {'id': rm_cfield_min,'value':  p1_row_data[10]},
-                                                           {'id': rm_cfield_max,'value':  p1_row_data[11]},
-                                                           {'id': rm_cfield_mean,'value':  p1_row_data[12]},
-                                                           {'id': rm_cfield_median,'value':  p1_row_data[13]},
-                                                           {'id': rm_cfield_samples,'value': len(period1_data1)},
-                                                           {'id': rm_cfield_tstamp,'value': p1_row_data[0]}                                                             ]
-                                                      )
+                    datoasubir = {
+                                  'tracker_id': rm_tracker_id,
+                                  'subject': 'p2',
+                                  'category_id': catsens2,
+                                  'value': p1_row_data[14],
+                                  'minstatus': p1_row_data[8],
+                                  'maxstatus': p1_row_data[9],
+                                  'min': p1_row_data[10],
+                                  'max': p1_row_data[11],
+                                  'mean': p1_row_data[12],
+                                  'median': p1_row_data[13],
+                                  'samples': len(period1_data2),
+                                  'tstamp': p1_row_data[0]
+                                 }
+                    datos_acumulados.append(datoasubir)                                  
+                    print("Long datosacumulados",len(datos_acumulados))
+                    
             # When there is no valid data, we will add a row in the spreadsheet telling 
             # it is invalid, but we will not upload info to the server
             else:
@@ -239,7 +299,7 @@ def datalogger(ser,getdata_cb,catsens1,catsens2,sensabbrev):
         if (i2 >= period2):
             # The current sample is the last one
             # let's create a timestamp and add it to the record
-            tstamp = datetime.now().strftime("%Y-%m-%d-%H%M%S")
+            tstamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             p2_row_data = [tstamp]
 
             ##### First sensor handling
@@ -250,7 +310,7 @@ def datalogger(ser,getdata_cb,catsens1,catsens2,sensabbrev):
             # If we obtained at least one valid data, we will make statistics and append the resulting
             # data to the record
             if (len(period2_data1) > 0):
-                p2_row_data += [min(period2_data1),max(period2_data1),statistics.mean(period2_data1),statistics.median(period2_data1),period2_data2[-1]]
+                p2_row_data += [min(period2_data1),max(period2_data1),statistics.mean(period2_data1),statistics.median(period2_data1),period2_data1[-1]]
 
             # When there is no valid data, we will add a row in the spreadsheet telling 
             # it is invalid, but we will not upload info to the server
