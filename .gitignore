@@ -131,3 +131,6 @@ dmypy.json
 /*.ods
 /*.ods#
 /.idea
+
+config_rm2.py
+

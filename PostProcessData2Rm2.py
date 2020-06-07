@@ -120,7 +120,7 @@ for datum in project_data:
                     )
                     '''
 
-    write_server = False
+    write_server = True
     if (write_server):
         dest_iss = rm_dest.issue.create(project_id = rm_prj_dest.id,
            tracker_id = config_rm2.rm_tracker_id,
