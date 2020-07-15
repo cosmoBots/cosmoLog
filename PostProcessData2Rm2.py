@@ -31,7 +31,7 @@ rm_prj_dest = rm_dest.project.get(config_rm2.rm_project_id_str)
 print ("Obtenemos proyecto destino: ",rm_prj_dest.identifier," | ",rm_prj_dest.name)
 
 for datum in project_data:
-    if (datum.category.id == rm_cat_press1):
+    if (datum.category.id == config_rm.rm_cat_press1):
         print(datum)
         datum.delete()
         
