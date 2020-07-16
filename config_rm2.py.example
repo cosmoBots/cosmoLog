@@ -1,6 +1,7 @@
 # This section configures the connection between the Datalogger tools and the Redmine instance which implements the requirements database
 rm_server_url = 'yoursecondaryserverurl'	# The Redmine URL
 rm_key_txt = 'yourapikey'			# The API key of the user (or bot) in which name the actions are undertaken.
+rm_ignore_cert = False
 rm_tracker_id = 1	# Tracker for Data series
 rm_cfield_value = 1	# Custom field id of the value
 rm_cfield_maxstatus = 5	# Custom field id of the max status

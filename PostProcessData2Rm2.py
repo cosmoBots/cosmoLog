@@ -8,7 +8,11 @@ from redminelib import Redmine
 import config_rm
 import config_rm2
 
-redmine = Redmine(config_rm.rm_server_url,key=config_rm.rm_key_txt)
+if config_rm.rm_ignore_cert:
+    redmine = Redmine(config_rm.rm_server_url,key=config_rm.rm_key_txt, requests={'verify': False})
+else:
+    redmine = Redmine(config_rm.rm_server_url,key=config_rm.rm_key_txt)
+
 projects = redmine.project.all()
 
 print("Proyectos:")
@@ -26,7 +30,11 @@ project_data = sorted(tmp, key=lambda k: k.id)
 
 # In[ ]:
 
-rm_dest = Redmine(config_rm2.rm_server_url,key=config_rm2.rm_key_txt)
+if config_rm2.rm_ignore_cert:
+    rm_dest = Redmine(config_rm2.rm_server_url,key=config_rm2.rm_key_txt, requests={'verify': False})
+else:
+    rm_dest = Redmine(config_rm2.rm_server_url,key=config_rm2.rm_key_txt)
+
 rm_prj_dest = rm_dest.project.get(config_rm2.rm_project_id_str)
 print ("Obtenemos proyecto destino: ",rm_prj_dest.identifier," | ",rm_prj_dest.name)
 
