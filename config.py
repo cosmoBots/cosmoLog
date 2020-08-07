@@ -22,5 +22,5 @@ cfg_temp_nsamples_period2 = 60
 
 # cfg_press_read_period = 1.0  The period is already set in the Pfeiffer device
 cfg_press_nsamples_period1 = 30
-cfg_prees_nsamples_period2 = 600
+cfg_press_nsamples_period2 = 600
 
