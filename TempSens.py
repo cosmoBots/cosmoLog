@@ -38,7 +38,7 @@ def getDataLakeshore():
             sleep(0.05)
 
         #print("getDataLakeshore: ", threading.get_ident())
-        t = threading.Timer(1.0, doit)
+        t = threading.Timer(cfg_temp_read_period, doit)
         t.start()
         doReturn = False
         PfLog.dre.command_tx_buf="RDGST? A".encode()
@@ -103,7 +103,7 @@ if config.cte_verbose:
 
 
 def execTempDatalog():
-    datalogger(serport,getDataLakeshore,rm_cat_temp1,rm_cat_temp2,"temp")
+    datalogger(serport,getDataLakeshore,rm_cat_temp1,rm_cat_temp2,"temp",cfg_temp_nsamples_period1, cfg_temp_nsamples_period2)
 
 tempDatalog = threading.Thread(target=execTempDatalog, name="tempDatalog")
 print("*** Lanzo tempDatalog")

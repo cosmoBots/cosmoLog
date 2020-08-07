@@ -73,7 +73,7 @@ def uploader():
 
 uploaderThread = None
                 
-def datalogger(ser,getdata_cb,catsens1,catsens2,sensabbrev):
+def datalogger(ser,getdata_cb,catsens1,catsens2,sensabbrev,nsamples_period1,nsamples_period2):
     global uploaderThread
     global datos_acumulados
     global tupload
@@ -95,8 +95,8 @@ def datalogger(ser,getdata_cb,catsens1,catsens2,sensabbrev):
     write_server = True
 
     # Configuration
-    period1 = 30   # The number of samples per row for period 1, this period is also uploaded to server
-    period2 = 600  # The number of samples per row for period 2, this period is NOT uploaded to server
+    period1 = nsamples_period1   # The number of samples per row for period 1, this period is also uploaded to server
+    period2 = nsamples_period2  # The number of samples per row for period 2, this period is NOT uploaded to server
     period1_max_rows = 2880 # The maximum number of rows per file of the period 1
     period2_max_rows = 144 # The maximum number of rows per file of the period 2
     valid_status_limit = 255  # maximum status code to store values in rows.  

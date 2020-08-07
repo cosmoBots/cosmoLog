@@ -63,20 +63,20 @@ serport = serial.Serial(
     )
 if config.cte_verbose:
     print("PRESS serial port: " + config.cte_serial_port)
-datalogger(serport,getDataPfeiffer,rm_cat_press1,rm_cat_press2,"press")
+    
 
 def execPressDatalog():
-    datalogger(serport,getDataPfeiffer,rm_cat_temp1,rm_cat_temp2,"temp")
+    datalogger(serport,getDataPfeiffer,rm_cat_press1,rm_cat_press2,"press",cfg_press_nsamples_period1, cfg_press_nsamples_period2)
 
-tempDatalog = threading.Thread(target=execPressDatalog, name="pressDatalog")
+pressDatalog = threading.Thread(target=execPressDatalog, name="pressDatalog")
 print("*** Lanzo pressDatalog")
-tempDatalog.start()
+pressDatalog.start()
 veces = 1
 while(1):
     sleep(10)
-    threadvivo = tempDatalog.is_alive()
+    threadvivo = pressDatalog.is_alive()
     if not threadvivo:
-        tempDatalog = threading.Thread(target=execPressDatalog, name="pressDatalog")
+        pressDatalog = threading.Thread(target=execPressDatalog, name="pressDatalog")
         print("*** Relanzo pressDatalog",veces)
-        tempDatalog.start()
+        pressDatalog.start()
 
