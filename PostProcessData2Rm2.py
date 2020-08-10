@@ -4,7 +4,7 @@
 # In[ ]:
 
 write_server = True
-write_thingsboard = True
+write_thingsboard = False #True
 
 import config_tb
 import requests
@@ -92,21 +92,24 @@ for datum in project_data:
               )
             
             if (write_thingsboard):
+                print(config_tb.telemetry_address)
                 client_ts = datum.custom_fields.get(config_rm.rm_cfield_tstamp).value
                 d = datetime.strptime(client_ts, "%Y-%m-%d %H:%M:%S")
                 unixtime = int(time.mktime(d.timetuple())*1000)
-                if (datum.category.id == rm_cat_press1):
+                if (datum.category.id == config_rm.rm_cat_press1):
                     category = 'Pres1'
-                if (datum.category.id == rm_cat_press2):
+                if (datum.category.id == config_rm.rm_cat_press2):
                     category = 'Pres2'
-                if (datum.category.id == rm_cat_temp1):
+                if (datum.category.id == config_rm.rm_cat_temp1):
                     category = 'Temp1'
-                if (datum.category.id == rm_cat_temmp2):
+                if (datum.category.id == config_rm.rm_cat_temp2):
                     category = 'Temp2'
                 
                 pload = {'ts':unixtime, "values":{category+'_value':999.99,category+'_category':category,category+'_minstatus':1515,category+'_maxstatus':1510,
                          category+'_min':1000.0,category+'_max':998.00, category+'_mean':1515.0, category+'_median':1516.0,category+'_samples':0,category+'_tstamp':client_ts}}
-                r = requests.post(telemetry_address,json = pload)
+                print(pload)
+                print("========")
+                r = requests.post(config_tb.telemetry_address,json = pload)
                 print(r)
                 
             if (dest_iss is not None):
