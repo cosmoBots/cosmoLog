@@ -1,0 +1,4 @@
+
+access_token = "ACCESSTOKEN"
+server_address = "http://YOURSERVER:PORT/api/v1/"+access_token
+telemetry_address = server_address + "/telemetry"
