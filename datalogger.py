@@ -1,12 +1,13 @@
 import sys
 import config
 import serial
+import config_tb
+import requests
+import time
 from datetime import datetime
 from collections import OrderedDict
 from pyexcel_ods import save_data
 import statistics
-from config_rm import *
-from redminelib import Redmine
 import threading
 from collections import deque
 
@@ -24,51 +25,33 @@ def uploader():
     tupload.start()
     print("************* Datos en cola*******",len(datos_acumulados))
 
-    redmine = Redmine(rm_server_url,key=rm_key_txt)
-    if redmine is None:
-        print("Error getting redmine instance")
-    
-    else:
-        print("Redmine instance get")
-        projects = redmine.project.all()
-        if projects is None:
-            print("Error getting redmine projects list")
-        
-        else:
-            print("Proyectos:")
-            for p in projects:
-                print ("\t",p.identifier," \t| ",p.name)
-
-            my_project = redmine.project.get(rm_project_id_str)
-            if my_project is None:
-                print("Error getting redmine project instance")
-            else:
-                print ("Obtenemos proyecto: ",my_project.identifier," | ",my_project.name)    
-    
-                while (len(datos_acumulados)>0):
-                    print("************* Datos en cola*******",len(datos_acumulados))
-                    datoasubir = datos_acumulados[0]
-                    if datoasubir is not None:
-                        print(f'Working on {datoasubir}')
-                        thisreqpres2 = redmine.issue.create(project_id = my_project.id,
-                                                   tracker_id = datoasubir['tracker_id'],
-                                                   subject = datoasubir['subject'],
-                                                   category_id = datoasubir['category_id'],
-                                                   custom_fields=[
-                                                       {'id': rm_cfield_value,'value': datoasubir['value']},
-                                                       {'id': rm_cfield_minstatus,'value': datoasubir['minstatus']},
-                                                       {'id': rm_cfield_maxstatus,'value': datoasubir['maxstatus']},
-                                                       {'id': rm_cfield_min,'value': datoasubir['min']},
-                                                       {'id': rm_cfield_max,'value':  datoasubir['max']},
-                                                       {'id': rm_cfield_mean,'value':  datoasubir['mean']},
-                                                       {'id': rm_cfield_median,'value':  datoasubir['median']},
-                                                       {'id': rm_cfield_samples,'value': datoasubir['samples']},
-                                                       {'id': rm_cfield_tstamp,'value': datoasubir['tstamp']}                                                             ]
-                          )
-                        datos_acumulados.popleft()
-                        print(f'Finished {datoasubir}')
-
-
+    while (len(datos_acumulados)>0):
+        print("************* Datos en cola*******",len(datos_acumulados))
+        datoasubir = datos_acumulados[0]
+        if datoasubir is not None:
+            print(f'Working on {datoasubir}')
+            print(config_tb.telemetry_address)
+            client_ts = datoasubir['tstamp']
+            d = datetime.strptime(client_ts, "%Y-%m-%d %H:%M:%S")
+            unixtime = int(time.mktime(d.timetuple())*1000)
+            category = datoasubir['category']
+            pload = {'ts':unixtime, "values":{category+'_value':datoasubir['value'],
+                                              category+'_category':datoasubir['category'],
+                                              category+'_minstatus':datoasubir['minstatus'],
+                                              category+'_maxstatus':datoasubir['maxstatus'],   
+                                              category+'_min':datoasubir['min'],
+                                              category+'_max':datoasubir['max'],
+                                              category+'_mean':datoasubir['mean'],
+                                              category+'_median':datoasubir['median'],
+                                              category+'_samples':datoasubir['samples'],
+                                              category+'_tstamp':client_ts}}
+            print(pload)
+            print("========")
+            r = requests.post(config_tb.telemetry_address,json = pload)
+            print(r)
+            
+            datos_acumulados.popleft()
+            print(f'Finished {datoasubir}')
 
 
 uploaderThread = None
@@ -130,8 +113,9 @@ def datalogger(ser,getdata_cb,catsens1,catsens2,sensabbrev,nsamples_period1,nsam
 
     # Begin the endless loop which acquires from the device, processes, uploads and stores
     #while (i <= 100):
-    dre.ser.flushInput()
-    dre.ser.flushOutput()
+    if not config.cte_emulate_devices:    
+        dre.ser.flushInput()
+        dre.ser.flushOutput()
 
     while (True):
         i += 1
@@ -181,9 +165,8 @@ def datalogger(ser,getdata_cb,catsens1,catsens2,sensabbrev,nsamples_period1,nsam
                 # The record must be uploaded to the server only if there is at least one valid sample in the series
                 if (write_server):
                     datoasubir = { 
-                                  'tracker_id': rm_tracker_id,
                                   'subject': 'p1',
-                                  'category_id': catsens1,
+                                  'category': catsens1,
                                   'value': p1_row_data[7],
                                   'minstatus': p1_row_data[1],
                                   'maxstatus': p1_row_data[2],
@@ -224,9 +207,8 @@ def datalogger(ser,getdata_cb,catsens1,catsens2,sensabbrev,nsamples_period1,nsam
                 # The record must be uploaded to the server only if there is at least one valid sample in the series
                 if (write_server):
                     datoasubir = {
-                                  'tracker_id': rm_tracker_id,
                                   'subject': 'p2',
-                                  'category_id': catsens2,
+                                  'category': catsens2,
                                   'value': p1_row_data[14],
                                   'minstatus': p1_row_data[8],
                                   'maxstatus': p1_row_data[9],

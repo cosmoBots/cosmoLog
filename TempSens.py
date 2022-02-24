@@ -26,7 +26,7 @@ def doit():
     doReturn = True
 
 def getDataLakeshore():
-    if (cte_simulate_sensors):
+    if (cte_simulate_sensors) or (cte_emulate_devices):
         #print("Espero 0.3 segundos")
         sleep(.5)
         return 99, 5555.0, 98, 5554
@@ -87,23 +87,24 @@ def getDataLakeshore():
 
 # In[ ]:
 
-
-serport = serial.Serial(
-        port=config.cte_serial_port2,
-        baudrate=9600,
-        parity=serial.PARITY_ODD,
-        stopbits=serial.STOPBITS_ONE,
-        bytesize=serial.SEVENBITS,
-        rtscts=False,
-        dsrdtr=False,
-        xonxoff=True
-    )
-if config.cte_verbose:
-    print("Chosen serial port: " + config.cte_serial_port2)
-
+if not cte_emulate_devices:
+    serport = serial.Serial(
+            port=config.cte_serial_port2,
+            baudrate=9600,
+            parity=serial.PARITY_ODD,
+            stopbits=serial.STOPBITS_ONE,
+            bytesize=serial.SEVENBITS,
+            rtscts=False,
+            dsrdtr=False,
+            xonxoff=True
+        )
+    if config.cte_verbose:
+        print("Chosen serial port: " + config.cte_serial_port2)
+else:
+    serport = None
 
 def execTempDatalog():
-    datalogger(serport,getDataLakeshore,rm_cat_temp1,rm_cat_temp2,"temp",cfg_temp_nsamples_period1, cfg_temp_nsamples_period2)
+    datalogger(serport,getDataLakeshore,"Temp1","Temp2","temp",cfg_temp_nsamples_period1, cfg_temp_nsamples_period2)
 
 tempDatalog = threading.Thread(target=execTempDatalog, name="tempDatalog")
 print("*** Lanzo tempDatalog")

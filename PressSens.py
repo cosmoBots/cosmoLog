@@ -19,7 +19,7 @@ def keep_alive():
 
 # Gets a response from the Motors
 def getDataPfeiffer():
-    if (cte_simulate_sensors):
+    if (cte_simulate_sensors) or (cte_emulate_devices):
         #print("Espero 0.3 segundos")
         sleep(.5)
         return 99, 5555.0, 98, 5554
@@ -50,23 +50,24 @@ def getDataPfeiffer():
 
 # In[ ]:
 
-
-serport = serial.Serial(
-        port=config.cte_serial_port,
-        baudrate=9600,
-        parity=serial.PARITY_NONE,
-        stopbits=serial.STOPBITS_ONE,
-        bytesize=serial.EIGHTBITS,
-        rtscts=False,
-        dsrdtr=False,
-        xonxoff=True
-    )
-if config.cte_verbose:
-    print("PRESS serial port: " + config.cte_serial_port)
-    
+if not cte_emulate_devices:
+    serport = serial.Serial(
+            port=config.cte_serial_port,
+            baudrate=9600,
+            parity=serial.PARITY_NONE,
+            stopbits=serial.STOPBITS_ONE,
+            bytesize=serial.EIGHTBITS,
+            rtscts=False,
+            dsrdtr=False,
+            xonxoff=True
+        )
+    if config.cte_verbose:
+        print("PRESS serial port: " + config.cte_serial_port)
+else:
+    serport = None
 
 def execPressDatalog():
-    datalogger(serport,getDataPfeiffer,rm_cat_press1,rm_cat_press2,"press",cfg_press_nsamples_period1, cfg_press_nsamples_period2)
+    datalogger(serport,getDataPfeiffer,"Press1","Press2","press",cfg_press_nsamples_period1, cfg_press_nsamples_period2)
 
 pressDatalog = threading.Thread(target=execPressDatalog, name="pressDatalog")
 print("*** Lanzo pressDatalog")
