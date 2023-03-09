@@ -1,0 +1,351 @@
+<html>
+  <head>
+    <title>Gris Graphs 2</title>
+    <!--Load the AJAX API-->
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+
+    var graficas = new Map();
+    var nombre = ""
+    var files = null;
+    var options = null;
+    var data2 =null;
+    var keys = null;
+    var dashboard = null;
+
+    // Load the Visualization API and the controls package.
+    google.charts.load('current', {'packages':['corechart', 'controls', 'line']});
+    
+    // Set a callback to run when the Google Visualization API is loaded.
+    google.charts.setOnLoadCallback(drawDashboard);
+      
+    function drawDashboard() {  // Llamos para rellenar el Select con las fechas disponibles.
+      google.script.run
+      .withFailureHandler(onFailure)
+      .withSuccessHandler(addListValues)
+      .getFilesNames();
+    
+    }
+
+    /* **************
+      Rellenamos el Select con las fechas y llamamos al constructior de gráficas.
+    ***************** */
+    function addListValues(values) {
+      var list = document.getElementById('dropdownList');   
+      removeOptions(list);
+      for (var i = 0; i < values.length; i++) {
+        var option = document.createElement("option"); 
+        option.value = values[i];
+        option.text = values[i];
+        list.appendChild(option);
+      }
+      //var selDays = document.getElementById('dropdownListDays');
+
+      google.script.run
+        .withFailureHandler(onFailure)
+        .withSuccessHandler(createGraphs)
+        .getGraphs(list.value, 1);
+    }
+
+    /* ***************
+      Creamos y rellenamos las gráficas.
+    ****************** */
+    function createGraphs(values) {
+
+      var limitsColors = ["orange", "red", "yellow", "darkred"];
+      var graphsColors = ["Aquamarine", "purple", "pink", "purple"];
+      var dataGraph = JSON.parse(values);   
+
+      //document.getElementById("datos_div").innerHTML = values;
+      statusText = "<table align=\"center\"><tr>";
+      limistText = "";
+      for (var i = 0; i < dataGraph.length; i++) {
+
+        grafica = dataGraph[i];
+        name = grafica.nombre;
+        keys = grafica.campos;
+        datos = grafica.data;
+        limites = grafica.limites;
+        ficheros = grafica.files;
+       
+        //console.log("Inicio " + i);
+        //console.log(name);
+        //console.log(keys);
+        //console.log(limites);
+
+        var data = new google.visualization.DataTable();
+        data.addColumn("string", 'datetime');
+        var colores = [];
+        var counter = 0;
+        for (k in keys) {
+          data.addColumn('number', keys[k]);
+          colores.push(graphsColors[counter]);
+          counter ++;
+        }
+
+        var counter = 0;
+        for (k in limites) {
+          data.addColumn('number', limites[k].name);
+          colores.push(limitsColors[counter]);
+          //console.log(limites[k].name);
+          counter ++;
+        }
+
+        //console.log(colores);
+
+        var chart = new google.visualization.LineChart(document.getElementById(i));
+        
+        var options = {
+          //width: 400,
+          height: 600,
+          title: name, 
+          colors: colores,
+          hAxis: {
+            title: '',
+            logScale: true
+          },
+          vAxis: {
+            title: keys,
+            logScale: false
+          }
+          //,colors: ['#a52714', '#097138']
+        }; 
+        
+
+        var max = {};
+        var min = {};
+        var maxDate = {};
+        var minDate = {};
+        var actualDate = {};
+        var actualValue = {};
+        for (j=0; j < datos.length; j++) {
+          var arrayItem = [];
+          aux = datos[j][0] + " ";
+          //console.log(aux)
+          //arrayItem.push(new Date(aux));  // Añadimos el campo fecha.
+          arrayItem.push(aux);  // Añadimos el campo fecha.
+          for (m=1; m< datos[j].length; m++) {
+            //console.log(m);
+            //console.log(datos[j][m]);
+            if (datos[j][m] != null) {
+              arrayItem.push(datos[j][m][0]);
+            } else {
+              arrayItem.push(datos[j][m]);
+            }
+          }
+          //console.log("Saliendo1");
+          //console.log(arrayItem);
+
+          counter = 1;
+          for (k in keys) {
+            //console.log(max.hasOwnProperty(k));
+            if (!max.hasOwnProperty(k)) {
+              max[k] = arrayItem[counter];
+            }
+            if (!min.hasOwnProperty(k)) {
+              min[k] = arrayItem[counter];
+            }
+            if (!maxDate.hasOwnProperty(k)) {
+              maxDate[k] = arrayItem[0];
+            }
+            if (!minDate.hasOwnProperty(k)) {
+              minDate[k] = arrayItem[0];
+            }
+            
+            if (max[k] < arrayItem[counter]) {
+              max[k] = arrayItem[counter];
+              maxDate[k] = arrayItem[0];
+            }
+            if (min[k] > arrayItem[counter]) {
+              //console.log(arrayItem);
+              min[k] = arrayItem[counter];
+              minDate[k] = arrayItem[0];
+            }
+            actualValue[k] = arrayItem[counter];
+            actualDate[k] = arrayItem[0];
+
+            counter ++;
+          }
+          
+          for (k in limites) {
+            //data.addColumn('number', keys[k]);
+            //console.log(limites[k].value);
+            arrayItem.push(limites[k].value);
+          }
+
+          data.addRow(arrayItem);
+        }
+        chart.draw(data, options); 
+        graficas.set(name, chart);
+
+
+        textoDiv = "<table align=\"center\">";
+        
+        
+  
+
+        for (k in keys) {
+          limistText += "<td>";
+          counter = 0;
+          colorStatus = "PaleGreen";
+          for (l in limites) {
+            //console.log(limites[l].name);
+            //console.log(limites[l].origen);
+            //console.log(keys[k]);
+            if (limites[l].origen == keys[k]) {
+              limistText += "<div style=\"background-color: " + limitsColors[counter] + "; text-align: center;padding:2px;\">" + limites[l].value + " " + limites[l].origen + "</div>";
+              if (limites[l].value < actualValue[k]) {
+                colorStatus = limitsColors[counter];
+              }
+              counter ++;
+            }
+          }
+          limistText += "</td><td>&nbsp;</td>";
+
+          statusText += "<td align=\"center\" style=\"padding:15px;\" bgcolor=\"" + colorStatus + "\"><b>" + keys[k] + "</b><br><br>" + actualValue[k] + "<br><br><small>" + parseDate(actualDate[k]) + "</small></td><td>&nbsp;</td>";
+          
+
+          textoDiv += "<tr><td colspan=\"8\" align=\"center\"><b>" +keys[k] + "</b></td></tr>";
+          textoDiv += "<tr><td><b>Min Date:</b> </td><td> " +  parseDate(minDate[k]) + "</td><td>&nbsp;</td><td><b>Max Date:</b> </td><td>" + parseDate(maxDate[k]) + "</td><td>&nbsp;</td><td><b>Actual Date:</b> </td><td>" + parseDate(actualDate[k]) + "</td></tr>";
+          textoDiv +="<tr><td><b>Min value:</b> </td><td>" + min[k] + "</td><td>&nbsp;</td><td><b>Max value:</b> </td><td>" + max[k] + "</td><td>&nbsp;</td><td><b>Actual value:</b> </td><td>" + actualValue[k] + "</td></tr>";
+        }
+        textoDiv += "</table>";        
+
+        nameDiv = "text" + i;
+        document.getElementById(nameDiv).innerHTML = textoDiv;        
+
+        //console.log("Fin " + i);
+      }
+      statusText += "</tr><td><td>&nbsp;</td></tr><tr>";
+      statusText += "</tr><td><td>Limits;</td></tr><tr>";
+      //console.log(limistText);
+      statusText += limistText + "</tr></table>";
+      nameDiv = "quick";
+      document.getElementById(nameDiv).innerHTML = statusText;
+    }
+
+    function pad2(n) {  // always returns a string
+      return (n < 10 ? '0' : '') + n;
+    }
+    function parseDate(dateIn) {
+      
+      date = new Date(dateIn.trim());
+     
+      aux = pad2(date.getDate()) + "/" +
+              pad2(date.getMonth() + 1) + "/" +
+              date.getFullYear() + " " +
+              pad2(date.getHours()) + ":" +
+              pad2(date.getMinutes()) + ":" +
+              pad2(date.getSeconds());
+      return aux;
+    }
+
+    function fillGraph(values) {
+      var dataGraph = JSON.parse(values);   
+      
+      var informacion = document.getElementById('datos_div');   
+      informacion.append(values);
+
+      for (var i = 0; i < dataGraph.length; i++) {
+
+        grafica = dataGraph[i];
+        name = grafica.nombre;
+        keys = grafica.campos;
+        datos = grafica.data;
+       
+        var options = {
+          title: name, 
+          hAxis: {
+            title: 'Time',
+            logScale: false
+          },
+          vAxis: {
+            title: keys,
+            logScale: true
+          }
+          //,colors: ['#a52714', '#097138']
+        }; 
+
+        var data = new google.visualization.DataTable();
+        data.addColumn("string", 'datetime');
+        var colores = [];
+        var counter = 0;
+        for (k in keys) {
+          data.addColumn('number', keys[k]);
+          colores.push(graphsColors[counter]);
+          counter ++;
+        }
+
+        var counter = 0;
+        for (k in limites) {
+          data.addColumn('number', limites[k].name);
+          colores.push(limitsColors[counter]);
+          //console.log(limites[k].name);
+          counter ++;
+        }
+
+        data.addRows(datos);
+
+        var graf = graficas.get(name);
+        graf.draw(data, options); 
+      }
+    }
+
+
+
+    function removeOptions(selectElement) {
+      var i, L = selectElement.options.length - 1;
+      for(i = L; i >= 0; i--) {
+          selectElement.remove(i);
+      }
+    }
+    function onFailure(err) {
+      var errorcode = err.message;
+      alert('There was an error!' + errorcode);
+      console.log('There was an error!' + errorcode);
+    }
+
+    function newDay() {
+      var sel = document.getElementById('dropdownList');
+      //var selDays = document.getElementById('dropdownListDays');
+      //console.log('Day selected!' + sel);
+
+      google.script.run
+        .withFailureHandler(onFailure)
+        .withSuccessHandler(createGraphs)
+        .getGraphs(sel.value, 1);
+    }
+
+    var intervalId = window.setInterval(function(){
+        newDay();
+    }, 1000000);
+    </script>
+
+  </head>
+
+  <body>
+      <div id="selectday">Select day:<select id="dropdownList" onchange="newDay()"></select>
+      <!--Select numbers of days to show:<select id="dropdownListDays" onchange="newDay()">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="7">7</option>
+              <option value="30">30</option>
+            </select>-->
+      </div>
+      <hr>
+      <!--Div that will hold the dashboard-->
+
+      <div id="quick"></div>
+      <!--<div id="quick1"></div>-->
+      <br>
+      <div id="text0"></div>
+      <div id="text1"></div>
+      <br>
+      <div id="0"></div>
+      <br>
+      <div id="1"></div> 
+      <hr>
+      <div id="datos_div"></div> 
+  </body>
+</html>
+
